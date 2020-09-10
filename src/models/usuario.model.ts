@@ -1,24 +1,30 @@
-import mongoose from 'mongoose';
-import validator from 'validator'
+import { Schema, Document, model } from 'mongoose';
+import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const UsuarioSchema = new mongoose.Schema({
+export interface IUsuario extends Document {
+  nombre: string;
+  correo: string;
+  clave: string;
+  tokens: string[];
+}
+
+const UsuarioSchema = new Schema({
   nombre: { type: String, required: true },
-  correo: { type: String, required: true,
+  correo: {
+    type: String,
+    required: true,
     unique: true,
     lowercase: true,
-    validate: value => {
-        if (!validator.isEmail(value)) {
-            throw new Error({ error: 'La direccion de email no es valida' })
-        }
-    } },
+    validate: [validator.isEmail, 'Email incorrecto'],
+  },
   clave: { type: String, required: true },
   tokens: [{ type: String }],
 });
 
-UsuarioSchema.pre('save', async function (next) {
-  const user = this as any;
+UsuarioSchema.pre<IUsuario>('save', async function (next) {
+  const user = this;
   if (user.isModified('clave')) {
     user.clave = await bcrypt.hash(user.clave, 8);
   }
@@ -45,7 +51,7 @@ UsuarioSchema.methods.generateAuthToken = async function () {
 };
 
 UsuarioSchema.statics.findByCredentials = async (correo: string, clave: string) => {
-  const user = (await mongoose.model('Usuario').findOne({ correo })) as any;
+  const user = (await model('Usuario').findOne({ correo })) as any;
 
   if (!user) {
     throw new Error('Credenciales incorrectas (correo)');
@@ -59,6 +65,6 @@ UsuarioSchema.statics.findByCredentials = async (correo: string, clave: string) 
   return user;
 };
 
-const Usuario = mongoose.model('Usuario', UsuarioSchema);
+const Usuario = model('Usuario', UsuarioSchema);
 
 export default Usuario;
