@@ -1,11 +1,20 @@
 import mongoose from 'mongoose';
+import validator from 'validator'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const UsuarioSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
-  correo: { type: String, required: true },
+  correo: { type: String, required: true,
+    unique: true,
+    lowercase: true,
+    validate: value => {
+        if (!validator.isEmail(value)) {
+            throw new Error({ error: 'La direccion de email no es valida' })
+        }
+    } },
   clave: { type: String, required: true },
+  tokens: [{ type: String }],
 });
 
 UsuarioSchema.pre('save', async function (next) {
@@ -17,7 +26,7 @@ UsuarioSchema.pre('save', async function (next) {
 });
 
 UsuarioSchema.methods.generateAuthToken = async function () {
-  var expiry = new Date();
+  let expiry = new Date();
   expiry.setDate(expiry.getDate() + 7);
 
   const user = this;
