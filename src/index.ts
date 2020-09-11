@@ -23,18 +23,18 @@ const server = new ApolloServer({
 server.applyMiddleware({ app });
 
 const httpServer = createServer(app);
-
 httpServer
   .listen({ port: process.env.PUERTO || 5301 })
-  .on('listening', () => {
+  .on('listening', async () => {
     console.log(`Servidor escuchando en http://localhost:${process.env.PUERTO || 5301}/graphql`);
-    db.conectar();
+    try {
+      await db.conectar();
+    } catch (error) {
+      httpServer.close(() => console.log(`Cerrando servidor por error al conectar la base de datos: (${error.message})`));
+    }
   })
   .on('error', (error) => console.log(`Error al iniciar el servidor: (${error.message})`));
 
 // const newUser = new Usuario({ nombre: 'Prueba1', correo: 'correo@prueba.com', clave: '123' });
 // newUser.save();
 
-process.on('SIGTERM', () => {
-  httpServer.close(() => console.log('Servidor cerrado'));
-});
