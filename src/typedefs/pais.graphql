@@ -16,4 +16,6 @@ extend type Query {
 
 extend type Mutation{
   crearPais(pais: PaisInput!): Pais!
+  actualizarPais(id:ID!, pais: PaisInput!): Pais!
+  borrarPais(id:ID!):Pais!
 }
