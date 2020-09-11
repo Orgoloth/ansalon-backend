@@ -9,8 +9,6 @@ import db from './db';
 import schema from './schema';
 import Usuario from './models/usuario.model';
 
-db.conectar();
-
 const app = express();
 
 // Middlewares
@@ -26,9 +24,13 @@ server.applyMiddleware({ app });
 
 const httpServer = createServer(app);
 
-httpServer.listen({ port: process.env.PUERTO || 5301 }, () => {
-  console.log(`Escuchando en http://localhost:${process.env.PUERTO || 5301}/graphql`);
-});
+httpServer
+  .listen({ port: process.env.PUERTO || 5301 })
+  .on('listening', () => {
+    console.log(`Escuchando en http://localhost:${process.env.PUERTO || 5301}/graphql`);
+    db.conectar();
+  })
+  .on('error', (error) => console.log(`Error al iniciar el servidor: (${error.message})`));
 
-const newUser = new Usuario({ nombre: 'Prueba1', correo: 'correo@prueba.com', clave: '123' });
-newUser.save();
+// const newUser = new Usuario({ nombre: 'Prueba1', correo: 'correo@prueba.com', clave: '123' });
+// newUser.save();
