@@ -1,3 +1,19 @@
+type Pais{
+  id: ID!
+  nombre: String!
+  descripcion: String
+}
+
+input PaisInput{
+  nombre: String
+  descripcion: String
+}
+
 extend type Query {
-  paisTest: String!
+  paises: [Pais!]
+  pais(id: ID!): Pais!
+}
+
+extend type Mutation{
+  crearPais(pais: PaisInput!): Pais!
 }
