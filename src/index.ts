@@ -27,10 +27,14 @@ const httpServer = createServer(app);
 httpServer
   .listen({ port: process.env.PUERTO || 5301 })
   .on('listening', () => {
-    console.log(`Escuchando en http://localhost:${process.env.PUERTO || 5301}/graphql`);
+    console.log(`Servidor escuchando en http://localhost:${process.env.PUERTO || 5301}/graphql`);
     db.conectar();
   })
   .on('error', (error) => console.log(`Error al iniciar el servidor: (${error.message})`));
 
 // const newUser = new Usuario({ nombre: 'Prueba1', correo: 'correo@prueba.com', clave: '123' });
 // newUser.save();
+
+process.on('SIGTERM', () => {
+  httpServer.close(() => console.log('Servidor cerrado'));
+});

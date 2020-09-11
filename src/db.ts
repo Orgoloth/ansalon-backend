@@ -9,6 +9,9 @@ const conectar = async () => {
     console.log('Base de datos conectada');
   } catch (error) {
     console.error(`Error al conectar a la base de datos: '${error.message}' (${error.code})`);
+    console.log('Cerrando servidor...');
+    process.exitCode = 1;
+    process.kill(process.pid, 'SIGTERM');
   }
 };
 
