@@ -7,6 +7,7 @@ export interface IUsuario extends Document {
   nombre: string;
   correo: string;
   clave: string;
+  rol: 'ADMIN' | 'JUGADOR';
   tokens: string[];
 }
 
@@ -20,6 +21,7 @@ const UsuarioSchema = new Schema({
     validate: [validator.isEmail, 'Email incorrecto'],
   },
   clave: { type: String, required: true },
+  rol: { type: String, required: true, default: 'JUGADOR' },
   tokens: [{ type: String }],
 });
 
@@ -35,18 +37,19 @@ UsuarioSchema.methods.generateAuthToken = async function () {
   let expiry = new Date();
   expiry.setDate(expiry.getDate() + 7);
 
-  const user = this;
+  // const user = this;
   const token = jwt.sign(
     {
       _id: this._id,
       correo: this.correo,
       nombre: this.nombre,
+      rol: this.rol,
       exp: expiry.getTime() / 1000,
     },
     process.env.JWT_KEY || 'jwt_fallback'
   );
-  user.tokens = user.tokens.concat({ token });
-  await user.save();
+  // user.tokens = user.tokens.concat({ token });
+  // await user.save();
   return token;
 };
 

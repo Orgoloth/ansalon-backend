@@ -5,21 +5,17 @@ import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
 
 import db from './db';
-
 import schema from './schema';
-import Usuario from './models/usuario.model';
 
 const app = express();
-
-// Middlewares
-app.use(cors());
-app.use(compression());
-
 const server = new ApolloServer({
   schema,
   introspection: true,
 });
 
+// Middlewares
+app.use(cors());
+app.use(compression());
 server.applyMiddleware({ app });
 
 const httpServer = createServer(app);
