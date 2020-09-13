@@ -12,6 +12,8 @@ const usuarioResolvers = {
 
   Mutation: {
     async crearUsuario(obj: any, { usuario }: any, context: any, info: any) {
+      // const nuevoUsuario = await Usuario.create(usuario);
+      // nuevoUsuario.generateAuthToken();
       return await Usuario.create(usuario);
     },
     async actualizarUsuario(obj: any, { id, usuario }: any, context: any, info: any) {

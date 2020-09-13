@@ -3,7 +3,7 @@ type Usuario {
   nombre: String!
   correo: String!
   clave: String!
-  rol: String!
+  roles: [String!]
   tokens: [String]
 }
 
@@ -11,6 +11,7 @@ input UsuarioInput {
   nombre: String
   correo: String
   clave: String
+  roles: [String]
 }
 
 extend type Query {
