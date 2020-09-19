@@ -1,7 +1,7 @@
 import { merge } from 'lodash';
 
-import usuarioResolvers from './usuario.resolvers';
-import paisResolvers from './pais.resolvers';
+import usuarioResolvers from './usuario/usuario.resolvers';
+import paisResolvers from './pais/pais.resolvers';
 
 // Resolvers
 const resolvers = merge(

@@ -1,21 +1,22 @@
-type Pais{
+type Pais {
   id: ID!
   nombre: String!
   descripcion: String
 }
 
-input PaisInput{
+input PaisInput {
   nombre: String
   descripcion: String
 }
 
 extend type Query {
+  paisesAuth: [Pais!]
   paises: [Pais!]
   pais(id: ID!): Pais!
 }
 
-extend type Mutation{
+extend type Mutation {
   crearPais(pais: PaisInput!): Pais!
-  actualizarPais(id:ID!, pais: PaisInput!): Pais!
-  borrarPais(id:ID!):Pais!
+  actualizarPais(id: ID!, pais: PaisInput!): Pais!
+  borrarPais(id: ID!): Pais!
 }

@@ -9,6 +9,7 @@ export interface IUsuario extends Document {
   clave: string;
   roles: string[];
   tokens: string[];
+  generateAuthToken(): Promise<string>;
 }
 
 const UsuarioSchema = new Schema<IUsuario>({
@@ -33,25 +34,25 @@ UsuarioSchema.pre<IUsuario>('save', async function (next) {
   next();
 });
 
-// UsuarioSchema.methods.generateAuthToken = async function () {
-//   let expiry = new Date();
-//   expiry.setDate(expiry.getDate() + 7);
+UsuarioSchema.methods.generateAuthToken = async function () {
+  let expiry = new Date();
+  expiry.setDate(expiry.getDate() + 7);
 
-//   const user = this;
-//   const token = jwt.sign(
-//     {
-//       _id: this._id,
-//       correo: this.correo,
-//       nombre: this.nombre,
-//       roles: this.roles,
-//       exp: expiry.getTime() / 1000,
-//     },
-//     process.env.JWT_KEY || 'jwt_fallback'
-//   );
-//   user.tokens = user.tokens.concat({ token });
-//   await user.save();
-//   return token;
-// };
+  const user = this;
+  const token = jwt.sign(
+    {
+      _id: this._id,
+      correo: this.correo,
+      nombre: this.nombre,
+      roles: this.roles,
+      exp: expiry.getTime() / 1000,
+    },
+    process.env.JWT_KEY || 'jwt_fallback'
+  );
+  user.tokens = user.tokens.concat(token);
+  await user.save();
+  return token;
+};
 
 UsuarioSchema.statics.findByCredentials = async (correo: string, clave: string) => {
   const user = (await model('Usuario').findOne({ correo })) as any;
@@ -68,6 +69,11 @@ UsuarioSchema.statics.findByCredentials = async (correo: string, clave: string) 
   return user;
 };
 
-const Usuario = model('Usuario', UsuarioSchema);
+UsuarioSchema.statics.findByToken = async (token: string) => {
+  const payload: any = jwt.decode(token);
+  return await model('Usuario').findById(payload._id);
+};
+
+const Usuario = model<IUsuario>('Usuario', UsuarioSchema);
 
 export default Usuario;

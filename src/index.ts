@@ -5,12 +5,14 @@ import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
 
 import db from './db';
-import schema from './schema';
+import schema from './graphql/schema';
+import { context } from './graphql/context';
 
 const app = express();
 const server = new ApolloServer({
   schema,
   introspection: true,
+  context,
 });
 
 // Middlewares
@@ -22,12 +24,13 @@ const httpServer = createServer(app);
 httpServer
   .listen({ port: process.env.PUERTO || 5301 })
   .on('listening', async () => {
-    console.log(`Servidor escuchando en http://localhost:${process.env.PUERTO || 5301}/graphql`);
+    console.log(`Servidor escuchando en http://localhost:${process.env.PUERTO || 5301}${server.graphqlPath}`);
     try {
       await db.conectar();
     } catch (error) {
-      httpServer.close(() => console.log(`Cerrando servidor por error al conectar la base de datos: (${error.message})`));
+      httpServer.close(() =>
+        console.log(`Cerrando servidor por error al conectar la base de datos: (${error.message})`)
+      );
     }
   })
   .on('error', (error) => console.log(`Error al iniciar el servidor: (${error.message})`));
-
