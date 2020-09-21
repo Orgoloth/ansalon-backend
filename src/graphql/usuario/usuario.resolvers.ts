@@ -1,5 +1,7 @@
 import { IUsuario } from './../../models/usuario.model';
 import Usuario from '../../models/usuario.model';
+import { authenticated } from '../../helpers/authenticated.guard';
+import { validateRole } from '../../helpers/validate-role';
 
 const usuarioResolvers = {
   Query: {
@@ -12,18 +14,48 @@ const usuarioResolvers = {
   },
 
   Mutation: {
-    async crearUsuario(obj: any, { usuario }: any, context: any, info: any) {
+    crearUsuario: async (obj: any, { usuario }: any, context: any, info: any) => {
       const nuevoUsuario = (await Usuario.create(usuario)) as IUsuario;
       await nuevoUsuario.generateAuthToken();
       return nuevoUsuario;
     },
-    async actualizarUsuario(obj: any, { id, usuario }: any, context: any, info: any) {
-      return await Usuario.findByIdAndUpdate(id, usuario, { new: true });
+
+    actualizarUsuario: authenticated(
+      async (obj: any, { id, usuario }: any, context: any, info: any) =>
+        await Usuario.findByIdAndUpdate(id, usuario, { new: true })
+    ),
+
+    borrarUsuario: authenticated(
+      async (obj: any, { id }: any, context: any, info: any) => await Usuario.findByIdAndRemove(id)
+    ),
+
+    registrar: async (obj: any, { usuario }: any, context: any, info: any) => {
+      try {
+        const nuevoUsuario = (await Usuario.create(usuario)) as IUsuario;
+        return await nuevoUsuario.generateAuthToken();
+      } catch (error) {
+        throw new Error(error.message);
+      }
     },
 
-    async borrarUsuario(obj: any, { id }: any, context: any, info: any) {
-      return await Usuario.findByIdAndRemove(id);
+    entrar: async (obj: any, { correo, clave }: any, context: any, info: any) => {
+      try {
+        const nuevoUsuario = (await Usuario.schema.statics.findByCredentials(correo, clave)) as IUsuario;
+        return await nuevoUsuario.generateAuthToken();
+      } catch (error) {
+        throw new Error(error);
+      }
     },
+
+    salirTodo: authenticated(async (obj: any, args: any, context: any, info: any) => {
+      try {
+        const currentUser = context.currentUser as IUsuario;
+        currentUser.tokens = [];
+        await currentUser.save();
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }),
   },
 };
 

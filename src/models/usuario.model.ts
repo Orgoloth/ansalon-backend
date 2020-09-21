@@ -58,12 +58,12 @@ UsuarioSchema.statics.findByCredentials = async (correo: string, clave: string) 
   const user = (await model('Usuario').findOne({ correo })) as any;
 
   if (!user) {
-    throw new Error('Credenciales incorrectas (correo)');
+    throw new Error('Credenciales incorrectas (DEBUG: correo)');
   }
 
   const isClaveMatch = await bcrypt.compare(clave, user.clave);
   if (!isClaveMatch) {
-    throw new Error('Credenciales incorrectas (clave)');
+    throw new Error('Credenciales incorrectas (DEBUG: clave)');
   }
 
   return user;
@@ -71,7 +71,10 @@ UsuarioSchema.statics.findByCredentials = async (correo: string, clave: string) 
 
 UsuarioSchema.statics.findByToken = async (token: string) => {
   const payload: any = jwt.decode(token);
-  return await model('Usuario').findById(payload._id);
+  const usuario = (await model('Usuario').findById(payload._id)) as IUsuario;
+  if (usuario.tokens.includes(token)) {
+    return usuario;
+  }
 };
 
 const Usuario = model<IUsuario>('Usuario', UsuarioSchema);

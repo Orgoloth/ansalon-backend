@@ -23,4 +23,7 @@ extend type Mutation {
   crearUsuario(usuario: UsuarioInput!): Usuario!
   actualizarUsuario(id: ID!, usuario: UsuarioInput!): Usuario!
   borrarUsuario(id: ID!): Usuario!
+  registrar(usuario: UsuarioInput!): String!
+  entrar(correo: String!, clave: String): String!
+  salirTodo: Boolean
 }
